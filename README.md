@@ -34,7 +34,7 @@ Prevenção contra Injeção: Validações robustas no Front-end (JS) e Back-end
 ---
 
 Tecnologias Utilizadas
-* Linguagem: Java 17
+* Linguagem: Java 24
 * Framework Web: Java Servlets 4.0 & JSP 2.3
 * Servidor Embutido: Apache Tomcat (via Cargo Maven Plugin)
 * Banco de Dados: PostgreSQL
