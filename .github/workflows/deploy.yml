@@ -34,9 +34,11 @@ jobs:
 
       - name: Instalar dependências
         run: npm ci
+        working-directory: frontend
 
       - name: Build do projeto React
         run: npm run build
+        working-directory: frontend
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v4
@@ -44,7 +46,7 @@ jobs:
       - name: Upload do artefato
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: frontend/dist
 
       - name: Deploy para GitHub Pages
         id: deployment
