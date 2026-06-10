@@ -10,7 +10,7 @@ import java.io.IOException;
  * Necessário para que o front-end em localhost:3000 ou GitHub Pages
  * possa se comunicar com a API Java.
  */
-@WebFilter("/api/*")
+@WebFilter("/*")
 public class CorsFilter implements Filter {
 
     @Override
