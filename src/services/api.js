@@ -6,7 +6,7 @@
  * Em desenvolvimento: http://localhost:8080/api
  * Em produção: coloque a URL do servidor remoto em .env
  */
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://carlos-hnl.github.io/Dev-Web-Trabalho-Pratico-Parte-2'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 
 /**
  * Faz uma requisição à API com tratamento de erro centralizado.
