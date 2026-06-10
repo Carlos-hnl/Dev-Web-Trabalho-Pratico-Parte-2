@@ -1,0 +1,36 @@
+meta {
+  name: Login - Credenciais Invalidas
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "naoexiste@email.com",
+    "senha": "senhaerrada"
+  }
+}
+
+tests {
+  test("Status 401", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("sucesso = false", function() {
+    expect(res.getBody().sucesso).to.equal(false);
+  });
+
+  test("Retorna campo erro", function() {
+    expect(res.getBody()).to.have.property("erro");
+  });
+}

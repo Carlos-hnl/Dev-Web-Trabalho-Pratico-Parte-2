@@ -1,0 +1,35 @@
+meta {
+  name: Cadastro
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/cadastro
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "nome": "João Silva",
+    "email": "joao@email.com",
+    "senha": "senha123"
+  }
+}
+
+tests {
+  test("Status 201 (criado) ou 409 (email ja existe)", function() {
+    const status = res.getStatus();
+    expect([201, 409]).to.include(status);
+  });
+
+  test("Resposta tem campo sucesso", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("sucesso");
+  });
+}

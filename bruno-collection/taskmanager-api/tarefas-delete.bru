@@ -1,0 +1,22 @@
+meta {
+  name: Excluir Tarefa (DELETE)
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/tarefas/1
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status 200 ou 404", function() {
+    const status = res.getStatus();
+    expect([200, 404]).to.include(status);
+  });
+
+  test("Resposta tem campo sucesso", function() {
+    expect(res.getBody()).to.have.property("sucesso");
+  });
+}

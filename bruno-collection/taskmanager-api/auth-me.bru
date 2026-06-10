@@ -1,0 +1,23 @@
+meta {
+  name: Verificar Sessao (Me)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/auth/me
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status 200 ou 401", function() {
+    const status = res.getStatus();
+    expect([200, 401]).to.include(status);
+  });
+
+  test("Resposta tem campo sucesso", function() {
+    const body = res.getBody();
+    expect(body).to.have.property("sucesso");
+  });
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Criar Tarefa (POST)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/tarefas
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "titulo": "Estudar React",
+    "descricao": "Revisar hooks e context API"
+  }
+}
+
+tests {
+  test("Status 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("sucesso = true", function() {
+    expect(res.getBody().sucesso).to.equal(true);
+  });
+}

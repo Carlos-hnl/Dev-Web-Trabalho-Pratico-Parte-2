@@ -1,0 +1,33 @@
+meta {
+  name: Atualizar Tarefa (PUT)
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/tarefas/1
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "titulo": "Estudar React (atualizado)",
+    "descricao": "Focar em useState, useEffect e Context API"
+  }
+}
+
+tests {
+  test("Status 200 ou 404", function() {
+    const status = res.getStatus();
+    expect([200, 404]).to.include(status);
+  });
+
+  test("Resposta tem campo sucesso", function() {
+    expect(res.getBody()).to.have.property("sucesso");
+  });
+}

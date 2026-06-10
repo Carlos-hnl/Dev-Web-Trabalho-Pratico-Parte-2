@@ -1,0 +1,25 @@
+meta {
+  name: Listar Tarefas (GET)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/tarefas
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("sucesso = true", function() {
+    expect(res.getBody().sucesso).to.equal(true);
+  });
+
+  test("dados e um array", function() {
+    expect(res.getBody().dados).to.be.an("array");
+  });
+}
