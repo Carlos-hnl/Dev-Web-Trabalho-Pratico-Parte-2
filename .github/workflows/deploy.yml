@@ -1,8 +1,9 @@
- name: Deploy Frontend para GitHub Pages
+name: Deploy Frontend para GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -11,12 +12,13 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -28,17 +30,13 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: 20
 
       - name: Instalar dependências
         run: npm ci
 
       - name: Build do projeto React
         run: npm run build
-        env:
-          # Substitua pela URL da sua API em produção
-          VITE_API_URL: ${{ secrets.VITE_API_URL || 'http://localhost:8080/api' }}
 
       - name: Configurar GitHub Pages
         uses: actions/configure-pages@v4
@@ -46,7 +44,7 @@ jobs:
       - name: Upload do artefato
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: ./dist
 
       - name: Deploy para GitHub Pages
         id: deployment
