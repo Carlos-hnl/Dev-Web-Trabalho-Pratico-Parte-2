@@ -1,68 +1,99 @@
-package com.taskmanager.filter;
+package com.taskmanager.dao;
 
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import com.taskmanager.model.Usuario;
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.sql.*;
 
 /**
- * Filtro de Autenticação — intercepta TODAS as requisições e verifica
- * se o usuário possui sessão ativa antes de acessar páginas protegidas.
- * Camada: Segurança (Filter)
- *
- * Rotas públicas (sem autenticação): /login, /cadastro, /css/*, /js/*, /img/*
+ * DAO (Data Access Object) responsável pelas operações de banco
+ * relacionadas à entidade Usuario.
+ * Camada: DAO (Model)
  */
-@WebFilter("/*")
-public class AuthFilter implements Filter {
+public class UsuarioDAO {
 
-    // Caminhos que não exigem autenticação
-    private static final Set<String> ROTAS_PUBLICAS = new HashSet<>(Arrays.asList(
-            "/login", "/cadastro"
-    ));
+    // ── Criar ─────────────────────────────────────────────────
+    /**
+     * Insere um novo usuário no banco após fazer hash da senha com BCrypt.
+     * @return true se inserido com sucesso
+     */
+    public boolean criar(Usuario usuario) throws SQLException {
+        String sql = "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)";
 
-    // Prefixos de recursos estáticos
-    private static final String[] PREFIXOS_PUBLICOS = {
-            "/css/", "/js/", "/img/", "/favicon.ico"
-    };
+        // Hash da senha antes de persistir
+        String senhaHash = BCrypt.hashpw(usuario.getSenha(), BCrypt.gensalt(12));
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+        try (Connection con = ConexaoPool.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        HttpServletRequest  req  = (HttpServletRequest)  request;
-        HttpServletResponse resp = (HttpServletResponse) response;
+            ps.setString(1, usuario.getNome());
+            ps.setString(2, usuario.getEmail().toLowerCase().trim());
+            ps.setString(3, senhaHash);
 
-        String caminho = req.getServletPath();
-
-        // ── Libera recursos estáticos e rotas públicas ─────────
-        if (ehPublico(caminho)) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        // ── Verifica sessão ────────────────────────────────────
-        HttpSession session = req.getSession(false);
-        boolean logado = session != null && session.getAttribute("usuarioLogado") != null;
-
-        if (logado) {
-            chain.doFilter(request, response); // continua normalmente
-        } else {
-            // Não autenticado → redireciona para login
-            resp.sendRedirect(req.getContextPath() + "/login");
+            return ps.executeUpdate() > 0;
         }
     }
 
-    private boolean ehPublico(String caminho) {
-        if (ROTAS_PUBLICAS.contains(caminho)) return true;
-        for (String prefixo : PREFIXOS_PUBLICOS) {
-            if (caminho.startsWith(prefixo)) return true;
+    // ── Buscar por email ──────────────────────────────────────
+    /**
+     * Busca um usuário pelo e-mail. Retorna null se não encontrado.
+     */
+    public Usuario buscarPorEmail(String email) throws SQLException {
+        String sql = "SELECT id, nome, email, senha, criado_em FROM usuarios WHERE email = ?";
+
+        try (Connection con = ConexaoPool.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, email.toLowerCase().trim());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapear(rs);
+                }
+            }
         }
-        return false;
+        return null;
     }
 
-    @Override public void init(FilterConfig cfg) {}
-    @Override public void destroy() {}
+    // ── Autenticar ────────────────────────────────────────────
+    /**
+     * Verifica credenciais. Retorna o Usuario autenticado ou null.
+     */
+    public Usuario autenticar(String email, String senhaDigitada) throws SQLException {
+        Usuario usuario = buscarPorEmail(email);
+        if (usuario == null) return null;
+
+        // Verifica hash BCrypt
+        if (BCrypt.checkpw(senhaDigitada, usuario.getSenha())) {
+            return usuario;
+        }
+        return null;
     }
+
+    // ── Verificar e-mail duplicado ────────────────────────────
+    public boolean emailExiste(String email) throws SQLException {
+        String sql = "SELECT 1 FROM usuarios WHERE email = ?";
+
+        try (Connection con = ConexaoPool.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, email.toLowerCase().trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    // ── Mapeamento ResultSet → Usuario ────────────────────────
+    private Usuario mapear(ResultSet rs) throws SQLException {
+        Usuario u = new Usuario();
+        u.setId(rs.getInt("id"));
+        u.setNome(rs.getString("nome"));
+        u.setEmail(rs.getString("email"));
+        u.setSenha(rs.getString("senha"));
+        Timestamp ts = rs.getTimestamp("criado_em");
+        if (ts != null) u.setCriadoEm(ts.toLocalDateTime());
+        return u;
+    }
+}
+
