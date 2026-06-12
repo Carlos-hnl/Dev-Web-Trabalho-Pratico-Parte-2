@@ -90,6 +90,14 @@ public class AuthServlet extends HttpServlet {
             session.setAttribute("usuarioLogado", usuario);
             session.setMaxInactiveInterval(30 * 60); // 30 minutos
 
+            resp.addHeader("Set-Cookie",
+                    "JSESSIONID=" + session.getId()
+                            + "; Path=" + req.getContextPath() + "/"
+                            + "; Max-Age=" + (30 * 60)
+                            + "; HttpOnly"
+                            + "; SameSite=None"
+                            + "; Secure");
+
             JsonObject dados = new JsonObject();
             dados.addProperty("id",    usuario.getId());
             dados.addProperty("nome",  usuario.getNome());
@@ -151,6 +159,14 @@ public class AuthServlet extends HttpServlet {
         if (session != null) {
             session.invalidate();
         }
+                
+        resp.addHeader("Set-Cookie",
+                "JSESSIONID=; Path=" + req.getContextPath() + "/"
+                        + "; Max-Age=0"
+                        + "; HttpOnly"
+                        + "; SameSite=None"
+                        + "; Secure");
+
         JsonUtil.enviar(resp, 200, JsonUtil.sucesso("Logout realizado com sucesso."));
     }
 
