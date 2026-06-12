@@ -24,7 +24,7 @@
     </filter>
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
-        <url-pattern>/api/*</url-pattern>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <!-- Filtro de autenticação via sessão -->
@@ -34,11 +34,11 @@
     </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
-        <url-pattern>/api/tarefas/*</url-pattern>
+        <url-pattern>/tarefas/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
-        <url-pattern>/api/usuario/*</url-pattern>
+        <url-pattern>/usuario/*</url-pattern>
     </filter-mapping>
 
     <welcome-file-list>
